@@ -1,6 +1,5 @@
-from datetime import date
-
-from pydantic import BaseModel, Field
+from datetime import date, datetime
+from pydantic import BaseModel, Field, field_validator
 
 from app.models.blood_group import BloodGroup
 from app.models.donor_status import VerificationStatus
@@ -12,10 +11,22 @@ class DonorProfileCreate(BaseModel):
     phone: str = Field(min_length=7)
     latitude: float | None = Field(default=None, ge=-90, le=90)
     longitude: float | None = Field(default=None, ge=-180, le=180)
-    last_donation_date: date | None = None
+    last_donation_date: date | str | None = None
     preferred_hospitals: list[str] = []
     preferred_blood_banks: list[str] = []
     emergency_availability: bool = False
+
+    @field_validator("last_donation_date", mode="before")
+    @classmethod
+    def parse_donation_date(cls, v):
+        if not v or v == "":
+            return None
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, "%Y-%m-%d").date()
+            except ValueError:
+                return None
+        return v
 
 
 class DonorProfileUpdate(BaseModel):
@@ -24,18 +35,25 @@ class DonorProfileUpdate(BaseModel):
     latitude: float | None = Field(default=None, ge=-90, le=90)
     longitude: float | None = Field(default=None, ge=-180, le=180)
     availability: bool | None = None
-    last_donation_date: date | None = None
+    last_donation_date: date | str | None = None
     preferred_hospitals: list[str] | None = None
     preferred_blood_banks: list[str] | None = None
     emergency_availability: bool | None = None
 
+    @field_validator("last_donation_date", mode="before")
+    @classmethod
+    def parse_donation_date(cls, v):
+        if not v or v == "":
+            return None
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, "%Y-%m-%d").date()
+            except ValueError:
+                return None
+        return v
+
 
 class DonorProfileOut(BaseModel):
-    """Full profile — only ever returned to the donor themself or
-    staff roles with a legitimate reason to see it (never the public
-    search endpoint). Precise coordinates live here — never in
-    DonorPublicOut."""
-
     id: str
     user_id: str
     blood_group: BloodGroup
@@ -53,12 +71,6 @@ class DonorProfileOut(BaseModel):
 
 
 class DonorPublicOut(BaseModel):
-    """Privacy-safe view for donor search/matching. No phone number,
-    no exact coordinates, no name — only an optional rounded distance
-    when the caller supplied a reference point. Matches the 'no
-    unnecessary personal info exposed publicly' / 'use approximate
-    location' requirements."""
-
     id: str
     blood_group: BloodGroup
     city: str
