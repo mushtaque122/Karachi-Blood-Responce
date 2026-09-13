@@ -1,0 +1,25 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+motor==3.5.1
+pymongo==4.8.0
+pydantic==2.9.2
+email-validator==2.2.0
+pydantic-settings==2.5.2
+python-jose[cryptography]==3.3.0
+passlib==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.9
+pyotp==2.10.0
+python-dotenv==1.0.1
+
+# Optional — only needed if you actually configure the SMS channel
+# (TWILIO_* env vars in .env.example). Not required for the app to
+# run; app/core/notifications/sms_sender.py raises a clear error if
+# unconfigured rather than needing this at import time.
+# twilio==9.3.7
+
+# Optional — only needed if you configure the AI Agent (ANTHROPIC_API_KEY
+# in .env.example). app/core/ai/agent.py raises a clear error if
+# unconfigured rather than needing this at import time or faking a reply.
+# anthropic==0.39.0
+

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+venv/
+test_e2e_smoke.py
+requirements-dev.txt

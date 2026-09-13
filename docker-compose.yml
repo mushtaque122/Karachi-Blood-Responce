@@ -1,0 +1,40 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+      MONGODB_DB_NAME: karachi_blood_response
+      # Replace with a real random string before any real use —
+      # this default is fine for local docker compose only.
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-only-change-me}
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      ENV: development
+      # Optional — leave unset locally; the app degrades honestly
+      # (503 / FAILED delivery status) rather than faking these.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS:-}
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
